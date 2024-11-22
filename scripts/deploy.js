@@ -1,10 +1,13 @@
+const { BN } = require("bn.js");
 const hre = require("hardhat");
 require("dotenv").config();
 
 async function main() {
+try {
   console.log("Deploying RandomNumberGenerator...");
 
-  const subscriptionId = parseInt(process.env.SUBSCRIPTION_ID); // Convert string to number
+  const subscriptionId = hre.ethers.BigNumber.from(process.env.SUBSCRIPTION_ID).toNumber();
+  console.log("subscriptionid" , subscriptionId)
   const vrfCoordinator = process.env.VRF_COORDINATOR;
   const keyHash = process.env.KEY_HASH;
 
@@ -12,11 +15,10 @@ async function main() {
     throw new Error("Required environment variables are not set");
   }
 
+  console.log("asjdansdk")
   const RandomNumberGenerator = await hre.ethers.getContractFactory("RandomNumberGenerator");
-  
-  // Convert subscriptionId to BigNumber if it's too large
   const randomNumberGenerator = await RandomNumberGenerator.deploy(
-    subscriptionId,
+   subscriptionId.value,
     vrfCoordinator,
     keyHash
   );
@@ -26,6 +28,9 @@ async function main() {
   console.log(
     `RandomNumberGenerator deployed to ${randomNumberGenerator.address}`
   );
+} catch (error) {
+  console.log(error )
+}
 }
 
 main().catch((error) => {
