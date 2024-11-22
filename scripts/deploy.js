@@ -4,7 +4,7 @@ require("dotenv").config();
 async function main() {
   console.log("Deploying RandomNumberGenerator...");
 
-  const subscriptionId = process.env.SUBSCRIPTION_ID;
+  const subscriptionId = parseInt(process.env.SUBSCRIPTION_ID); // Convert string to number
   const vrfCoordinator = process.env.VRF_COORDINATOR;
   const keyHash = process.env.KEY_HASH;
 
@@ -13,6 +13,8 @@ async function main() {
   }
 
   const RandomNumberGenerator = await hre.ethers.getContractFactory("RandomNumberGenerator");
+  
+  // Convert subscriptionId to BigNumber if it's too large
   const randomNumberGenerator = await RandomNumberGenerator.deploy(
     subscriptionId,
     vrfCoordinator,

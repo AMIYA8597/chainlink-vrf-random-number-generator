@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.19; // Updated to align with your hardhat-config.js
+pragma solidity ^0.8.7;
 
 import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
-import "@chainlink/contracts/src/v0.8/vrf/VRFConsumerBaseV2.sol";
-
+import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
 
 contract RandomNumberGenerator is VRFConsumerBaseV2 {
     event RequestSent(uint256 requestId, uint32 numWords);
@@ -16,20 +15,20 @@ contract RandomNumberGenerator is VRFConsumerBaseV2 {
         uint256[] randomWords;
     }
 
-    mapping(uint256 => RequestStatus) public s_requests; 
+    mapping(uint256 => RequestStatus) public s_requests;
     VRFCoordinatorV2Interface COORDINATOR;
 
     uint256[] public s_randomWords;
     uint256 public s_requestId;
     uint32 public callbackGasLimit = 100000;
-    uint16 public requestConfirmations = 3; // Minimum number of confirmations
-    uint32 public numWords = 1; // Number of random words to return
+    uint16 public requestConfirmations = 3;
+    uint32 public numWords = 1;
 
-    uint64 public s_subscriptionId; // Chainlink subscription ID
-    bytes32 public s_keyHash; // Key hash of the VRF
-    uint256 public lastRandomNumber; // Store the last generated random number
-    
-    address public owner; // Store the owner's address
+    uint64 public s_subscriptionId;
+    bytes32 public s_keyHash;
+    uint256 public lastRandomNumber;
+
+    address public owner;
 
     modifier onlyOwner() {
         require(msg.sender == owner, "Not the owner");
@@ -44,7 +43,7 @@ contract RandomNumberGenerator is VRFConsumerBaseV2 {
         COORDINATOR = VRFCoordinatorV2Interface(vrfCoordinator);
         s_subscriptionId = subscriptionId;
         s_keyHash = keyHash;
-        owner = msg.sender; // Set the contract deployer as the owner
+        owner = msg.sender;
     }
 
     function requestRandomNumber() public onlyOwner returns (uint256 requestId) {
@@ -58,7 +57,7 @@ contract RandomNumberGenerator is VRFConsumerBaseV2 {
         s_requests[requestId] = RequestStatus({
             fulfilled: false,
             exists: true,
-            randomWords: new uint256[](0)
+            randomWords: new uint256[](0)  // Cory initializing an empty array
         });
         s_requestId = requestId;
         emit RequestSent(requestId, numWords);
@@ -89,6 +88,40 @@ contract RandomNumberGenerator is VRFConsumerBaseV2 {
         return lastRandomNumber;
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
