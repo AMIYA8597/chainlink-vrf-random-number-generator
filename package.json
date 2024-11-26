@@ -12,13 +12,15 @@
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^2.0.2",
     "@nomiclabs/hardhat-ethers": "^2.2.3",
-    "hardhat": "^2.14.0"
+    "chai": "^4.4.1",
+    "ethers": "^5.7.2",
+    "hardhat": "^2.14.0",
+    "mocha": "^10.8.2"
   },
   "dependencies": {
     "@chainlink/contracts": "^0.6.1",
     "bignumber.js": "^9.1.2",
     "bn.js": "^5.2.1",
-    "dotenv": "^16.0.3",
-    "ethers": "^5.7.2"
+    "dotenv": "^16.0.3"
   }
 }

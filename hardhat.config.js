@@ -1,5 +1,8 @@
 require("@nomicfoundation/hardhat-toolbox");
+// import "@nomiclabs/hardhat-ethers";
+// import { task } from "hardhat/config";
 require("dotenv").config();
+
 
 module.exports = {
   solidity: {
@@ -18,3 +21,8 @@ module.exports = {
     },
   },
 };
+
+
+// export default {
+//   solidity: "0.8.7",
+// };

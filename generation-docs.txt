@@ -25,9 +25,21 @@ npx hardhat run scripts/deploy.js --network sepolia
 
 
 
+for sepolia testnet  {
+
+   VRF Coordinator: 0x8103B0A8A00be2DDC778e6e7eaa21791Cd364625
+   Key Hash: 0x474e34a077df58807dbe9c96d3c009b23b3c6d0cce433e59bbf5b34f823bc56c
+
+}   //static for alll time
 
 
 
+for ethereum mainnet :  {
+
+   VRF Coordinator: 0x271682DEB8C4E0901D1a1550aD2e64D568E69909
+   Key Hash: 0x8af398995b04c28e9951adb9721ef74c74f93e6a478f39e7e0777be13527e7ef
+
+}     //static for alll time
 
 
 
@@ -179,3 +191,20 @@ Let me know once you've connected your wallet to the VRF page and we can proceed
 3. Or any other part of this process?
 
 Also, please let me know if you run into any errors or if something doesn't look right!
+
+
+
+
+
+
+
+
+
+Welcome to Chainlink VRF!
+We require a signature in order to ensure you are the owner of the subscription.
+Wallet address:
+0x8710c5e8c8c4265f5cc6aa098cf095b1dfc294e6
+VRF Coordinator address:
+0x9ddfaca8183c41ad55329bdeed9f6a8d53168b1b
+Subscription ID:
+106111371893569236023738466182618188580467698299985578210771692507360666227032
