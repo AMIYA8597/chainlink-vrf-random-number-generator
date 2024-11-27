@@ -15,6 +15,8 @@ npx hardhat compile
 # Deploy contract
 npx hardhat run scripts/deploy.js --network sepolia
 
+npx hardhat run scripts/request-random-number.js --network sepolia
+
 
 
 
@@ -208,3 +210,85 @@ VRF Coordinator address:
 0x9ddfaca8183c41ad55329bdeed9f6a8d53168b1b
 Subscription ID:
 106111371893569236023738466182618188580467698299985578210771692507360666227032
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Welcome to Chainlink VRF!
+We require a signature in order to ensure you are the owner of the subscription.
+Wallet address:
+0x8710c5e8c8c4265f5cc6aa098cf095b1dfc294e6
+VRF Coordinator address:
+0x9ddfaca8183c41ad55329bdeed9f6a8d53168b1b
+Subscription ID:
+36853157830672282358438369635527892574353414662630409358226301330858347733724
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Starting deployment...
+Formatted Subscription ID: 13207196953143026396
+
+Deployment Parameters:
+Original Subscription ID: 36853157830672282358438369635527892574353414662630409358226301330858347733724
+Formatted Subscription ID: 13207196953143026396
+VRF Coordinator: 0x9ddfaca8183c41ad55329bdeed9f6a8d53168b1b
+Key Hash: 0x34386a32bc15bc5ba711f7aa2fe8b7f8e29b0842f957395b750574bb51065d17
+
+Deploying RandomNumberGenerator...
+
+✅ Contract deployed successfully!
+Contract address: 0xd49c8Ab12f9BcA7F12Fc51D3FA783a34d9962D21
+
+📝 Verification command:
+npx hardhat verify --network mumbai \
+  0xd49c8Ab12f9BcA7F12Fc51D3FA783a34d9962D21 \
+  13207196953143026396 \
+  0x9ddfaca8183c41ad55329bdeed9f6a8d53168b1b \
+  0x34386a32bc15bc5ba711f7aa2fe8b7f8e29b0842f957395b750574bb51065d17
+
+🔍 Next steps:
+1. Add the contract address as a consumer in your Chainlink VRF subscription
+2. Ensure your subscription has enough LINK tokens
+3. Call requestRandomNumber() to get a random number
+4. Use getLastRandomNumber() to retrieve the generated number (1-100)

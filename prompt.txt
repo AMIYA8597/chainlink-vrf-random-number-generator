@@ -1,0 +1,169 @@
+this is my smart contract file which is store in contracts/RandomNumberGenerator.sol
+
+import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
+import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
+
+contract RandomNumberGenerator is VRFConsumerBaseV2 {
+    event RequestSent(uint256 requestId, uint32 numWords);
+    event RequestFulfilled(uint256 requestId, uint256[] randomWords);
+    event NumberGenerated(uint256 randomNumber);
+
+    struct RequestStatus {
+        bool fulfilled;
+        bool exists;
+        uint256[] randomWords;
+    }
+
+    mapping(uint256 => RequestStatus) public s_requests;
+    VRFCoordinatorV2Interface COORDINATOR;
+
+    uint256[] public s_randomWords;
+    uint256 public s_requestId;
+    uint32 public callbackGasLimit = 100000;
+    uint16 public requestConfirmations = 3;
+    uint32 public numWords = 1;
+
+    uint64 public s_subscriptionId;
+    bytes32 public s_keyHash;
+    uint256 public lastRandomNumber;
+
+    address public owner;
+
+    modifier onlyOwner() {
+        require(msg.sender == owner, "Not the owner");
+        _;
+    }
+
+    constructor(
+        uint64 subscriptionId,
+        address vrfCoordinator,
+        bytes32 keyHash
+    ) VRFConsumerBaseV2(vrfCoordinator) {
+        COORDINATOR = VRFCoordinatorV2Interface(vrfCoordinator);
+        s_subscriptionId = subscriptionId;
+        s_keyHash = keyHash;
+        owner = msg.sender;
+    }
+
+    function requestRandomNumber() public onlyOwner returns (uint256 requestId) {
+        requestId = COORDINATOR.requestRandomWords(
+            s_keyHash,
+            s_subscriptionId,
+            requestConfirmations,
+            callbackGasLimit,
+            numWords
+        );
+        s_requests[requestId] = RequestStatus({
+            fulfilled: false,
+            exists: true,
+            randomWords: new uint256[](0)  // Cory initializing an empty array
+        });
+        s_requestId = requestId;
+        emit RequestSent(requestId, numWords);
+        return requestId;
+    }
+
+    function fulfillRandomWords(
+        uint256 _requestId,
+        uint256[] memory _randomWords
+    ) internal override {
+        require(s_requests[_requestId].exists, "Request not found");
+        s_requests[_requestId].fulfilled = true;
+        s_requests[_requestId].randomWords = _randomWords;
+        lastRandomNumber = (_randomWords[0] % 48) + 1; // Convert to 1-48 range
+        emit RequestFulfilled(_requestId, _randomWords);
+        emit NumberGenerated(lastRandomNumber);
+    }
+
+    function getRequestStatus(
+        uint256 _requestId
+    ) external view returns (bool fulfilled, uint256[] memory randomWords) {
+        require(s_requests[_requestId].exists, "Request not found");
+        RequestStatus memory request = s_requests[_requestId];
+        return (request.fulfilled, request.randomWords);
+    }
+
+    function getLastRandomNumber() external view returns (uint256) {
+        return lastRandomNumber;
+    }
+}
+
+
+
+
+this is my javascript file  scripts/deploy.js file 
+
+
+const hre = require("hardhat");
+require("dotenv").config();
+
+async function main() {
+  try {
+    console.log("Starting deployment...");
+
+    // Get deployment parameters
+    const subscriptionId = process.env.SUBSCRIPTION_ID;
+    const vrfCoordinator = process.env.VRF_COORDINATOR;
+    const keyHash = process.env.KEY_HASH;
+
+    // Validate parameters
+    if (!subscriptionId || !vrfCoordinator || !keyHash) {
+      throw new Error("Missing environment variables");
+    }
+
+    // Convert subscription ID to the correct format
+    let formattedSubId;
+    try {
+      const bigNumSubId = hre.ethers.BigNumber.from(subscriptionId);
+      formattedSubId = bigNumSubId.mod(hre.ethers.BigNumber.from("18446744073709551616")); // 2^64
+      console.log("Formatted Subscription ID:", formattedSubId.toString());
+    } catch (error) {
+      console.error("Error formatting subscription ID:", error);
+      process.exit(1);
+    }
+
+    console.log("\nDeployment Parameters:");
+    console.log("Original Subscription ID:", subscriptionId);
+    console.log("Formatted Subscription ID:", formattedSubId.toString());
+    console.log("VRF Coordinator:", vrfCoordinator);
+    console.log("Key Hash:", keyHash);
+
+    // Deploy contract
+    console.log("\nDeploying RandomNumberGenerator...");
+    const RandomNumberGenerator = await hre.ethers.getContractFactory("RandomNumberGenerator");
+    
+    const randomNumberGenerator = await RandomNumberGenerator.deploy(
+      formattedSubId,
+      vrfCoordinator,
+      keyHash
+    );
+
+    await randomNumberGenerator.deployed();
+
+    console.log("\n✅ Contract deployed successfully!");
+    console.log(`Contract address: ${randomNumberGenerator.address}`);
+
+  } catch (error) {
+    console.error("\n❌ Deployment failed:");
+    console.error(error);
+    process.exit(1);
+  }
+}
+
+main()
+  .then(() => process.exit(0))
+  .catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });
+
+
+
+
+
+
+
+
+
+
+now this is my file where I getting output as a smart contract address , but I want real VRF number from fetch through chainlink, so make it happen and tell me the entire process and regeterate the full files after changes modification

@@ -19,6 +19,8 @@
   },
   "dependencies": {
     "@chainlink/contracts": "^0.6.1",
+    "@nomiclabs/hardhat-waffle": "^2.0.6",
+    "@openzeppelin/contracts": "^5.1.0",
     "bignumber.js": "^9.1.2",
     "bn.js": "^5.2.1",
     "dotenv": "^16.0.3"

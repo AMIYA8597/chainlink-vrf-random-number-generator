@@ -31,3 +31,5 @@ npx hardhat compile
 
 # Deploy contract
 npx hardhat run scripts/deploy.js --network sepolia
+
+npx hardhat run scripts/request-random-number.js --network sepolia
