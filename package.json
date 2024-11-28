@@ -23,6 +23,6 @@
     "@openzeppelin/contracts": "^5.1.0",
     "bignumber.js": "^9.1.2",
     "bn.js": "^5.2.1",
-    "dotenv": "^16.0.3"
+    "dotenv": "^16.4.5"
   }
 }

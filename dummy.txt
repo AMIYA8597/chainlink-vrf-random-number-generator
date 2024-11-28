@@ -1,3 +1,152 @@
+28/11/24
+
+
+
+
+Message
+
+Welcome to Chainlink VRF!
+We require a signature in order to ensure you are the owner of the subscription.
+Wallet address:
+0xa1c861165a4e41ad216becafc147beb74164b799
+VRF Coordinator address:
+0x9ddfaca8183c41ad55329bdeed9f6a8d53168b1b
+Subscription ID:
+20572587851049791190136848810327205211820923343556422383224233152373269622568
+
+
+
+
+
+
+
+
+Message
+
+Welcome to Chainlink VRF!
+We require a signature in order to ensure you are the owner of the subscription.
+Wallet address:
+0x152f5c2356406836b8d75fc24f1022a26a9d46ab
+VRF Coordinator address:
+0x9ddfaca8183c41ad55329bdeed9f6a8d53168b1b
+Subscription ID:
+7208775827381642307364286924112449032964512926618315259642953374238407880481
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Message
+
+Welcome to Chainlink VRF!
+We require a signature in order to ensure you are the owner of the subscription.
+Wallet address:
+0x152f5c2356406836b8d75fc24f1022a26a9d46ab
+VRF Coordinator address:
+0x9ddfaca8183c41ad55329bdeed9f6a8d53168b1b
+Subscription ID:
+78726789842767853988384159817333958295889626122251568188593986540743415057425
+
+
+
+
+
+
+
+
+
+Message
+
+Welcome to Chainlink VRF!
+We require a signature in order to ensure you are the owner of the subscription.
+Wallet address:
+0x8710c5e8c8c4265f5cc6aa098cf095b1dfc294e6
+VRF Coordinator address:
+0x9ddfaca8183c41ad55329bdeed9f6a8d53168b1b
+Subscription ID:
+98764978666782368494883606440997074266106896640120250652470136393534110378420
+
+
+
+
+
+Message
+
+Welcome to Chainlink VRF!
+We require a signature in order to ensure you are the owner of the subscription.
+Wallet address:
+0x8710c5e8c8c4265f5cc6aa098cf095b1dfc294e6
+VRF Coordinator address:
+0x9ddfaca8183c41ad55329bdeed9f6a8d53168b1b
+Subscription ID:
+109090140555714248778009169198661773063499881987055871301912971014092402418876
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Message
+
+Welcome to Chainlink VRF!
+We require a signature in order to ensure you are the owner of the subscription.
+Wallet address:
+0x8710c5e8c8c4265f5cc6aa098cf095b1dfc294e6
+VRF Coordinator address:
+0x9ddfaca8183c41ad55329bdeed9f6a8d53168b1b
+Subscription ID:
+54055072595769913884610172547352708988914475471109562814885967742720176014376
+
+54055072595769913884610172547352708988914475471109562814885967742720176014376
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 Important
 
 Your consumer contract must use the Subscription ID:

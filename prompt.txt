@@ -1,92 +1,4 @@
-this is my smart contract file which is store in contracts/RandomNumberGenerator.sol
 
-import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
-import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
-
-contract RandomNumberGenerator is VRFConsumerBaseV2 {
-    event RequestSent(uint256 requestId, uint32 numWords);
-    event RequestFulfilled(uint256 requestId, uint256[] randomWords);
-    event NumberGenerated(uint256 randomNumber);
-
-    struct RequestStatus {
-        bool fulfilled;
-        bool exists;
-        uint256[] randomWords;
-    }
-
-    mapping(uint256 => RequestStatus) public s_requests;
-    VRFCoordinatorV2Interface COORDINATOR;
-
-    uint256[] public s_randomWords;
-    uint256 public s_requestId;
-    uint32 public callbackGasLimit = 100000;
-    uint16 public requestConfirmations = 3;
-    uint32 public numWords = 1;
-
-    uint64 public s_subscriptionId;
-    bytes32 public s_keyHash;
-    uint256 public lastRandomNumber;
-
-    address public owner;
-
-    modifier onlyOwner() {
-        require(msg.sender == owner, "Not the owner");
-        _;
-    }
-
-    constructor(
-        uint64 subscriptionId,
-        address vrfCoordinator,
-        bytes32 keyHash
-    ) VRFConsumerBaseV2(vrfCoordinator) {
-        COORDINATOR = VRFCoordinatorV2Interface(vrfCoordinator);
-        s_subscriptionId = subscriptionId;
-        s_keyHash = keyHash;
-        owner = msg.sender;
-    }
-
-    function requestRandomNumber() public onlyOwner returns (uint256 requestId) {
-        requestId = COORDINATOR.requestRandomWords(
-            s_keyHash,
-            s_subscriptionId,
-            requestConfirmations,
-            callbackGasLimit,
-            numWords
-        );
-        s_requests[requestId] = RequestStatus({
-            fulfilled: false,
-            exists: true,
-            randomWords: new uint256[](0)  // Cory initializing an empty array
-        });
-        s_requestId = requestId;
-        emit RequestSent(requestId, numWords);
-        return requestId;
-    }
-
-    function fulfillRandomWords(
-        uint256 _requestId,
-        uint256[] memory _randomWords
-    ) internal override {
-        require(s_requests[_requestId].exists, "Request not found");
-        s_requests[_requestId].fulfilled = true;
-        s_requests[_requestId].randomWords = _randomWords;
-        lastRandomNumber = (_randomWords[0] % 48) + 1; // Convert to 1-48 range
-        emit RequestFulfilled(_requestId, _randomWords);
-        emit NumberGenerated(lastRandomNumber);
-    }
-
-    function getRequestStatus(
-        uint256 _requestId
-    ) external view returns (bool fulfilled, uint256[] memory randomWords) {
-        require(s_requests[_requestId].exists, "Request not found");
-        RequestStatus memory request = s_requests[_requestId];
-        return (request.fulfilled, request.randomWords);
-    }
-
-    function getLastRandomNumber() external view returns (uint256) {
-        return lastRandomNumber;
-    }
-}
 
 
 
@@ -161,9 +73,126 @@ main()
 
 
 
+// this is my another js file scripts/request-random-number.js
 
 
 
 
 
-now this is my file where I getting output as a smart contract address , but I want real VRF number from fetch through chainlink, so make it happen and tell me the entire process and regeterate the full files after changes modification
+
+
+
+
+
+
+const hre = require("hardhat");
+require("dotenv").config();
+
+async function main() {
+  try {
+    const CONTRACT_ADDRESS = process.env.CONTRACT_ADDRESS;
+    if (!CONTRACT_ADDRESS) {
+      throw new Error("CONTRACT_ADDRESS not found in environment variables");
+    }
+
+    console.log("Contract address:", CONTRACT_ADDRESS);
+
+    const [signer] = await hre.ethers.getSigners();
+    console.log("Using account:", signer.address);
+
+    const RandomNumberGenerator = await hre.ethers.getContractFactory("RandomNumberGenerator");
+    const contract = await RandomNumberGenerator.attach(CONTRACT_ADDRESS);
+
+    // Check contract state
+    const owner = await contract.owner();
+    console.log("Contract owner:", owner);
+
+    const subId = await contract.checkSubscription();
+    console.log("Subscription ID:", subId.toString());
+
+    const keyHash = await contract.s_keyHash();
+    console.log("Key Hash:", keyHash);
+
+    const coordinator = await contract.getCoordinator();
+    console.log("VRF Coordinator:", coordinator);
+
+    // Check if the caller is the owner
+    if (owner.toLowerCase() !== signer.address.toLowerCase()) {
+      throw new Error("The caller is not the contract owner");
+    }
+
+    console.log("Requesting random number...");
+    
+    // Request with higher gas limit
+    const tx = await contract.requestRandomNumber({
+      gasLimit: 3000000
+    });
+
+    console.log("Transaction hash:", tx.hash);
+    console.log("Waiting for confirmation...");
+    
+    const receipt = await tx.wait();
+    
+    if (receipt.status === 0) {
+      throw new Error("Transaction failed");
+    }
+
+    const requestSentEvent = receipt.events?.find(e => e.event === "RequestSent");
+    const requestId = requestSentEvent?.args?.requestId;
+
+    if (!requestId) {
+      throw new Error("No RequestSent event found");
+    }
+
+    console.log("Request ID:", requestId.toString());
+    console.log("\nWaiting for Chainlink VRF response...");
+    console.log("(This may take 1-2 minutes on Sepolia)");
+
+    return new Promise((resolve) => {
+      contract.once("NumberGenerated", async (randomNumber) => {
+        console.log("\nRandom number generated!");
+        console.log("Number (1-48):", randomNumber.toString());
+
+        const [fulfilled, randomWords] = await contract.getRequestStatus(requestId);
+        console.log("\nRequest Status:");
+        console.log("Fulfilled:", fulfilled);
+        console.log("Random Words:", randomWords.map(w => w.toString()));
+
+        resolve();
+      });
+
+      // Set timeout
+      setTimeout(() => {
+        console.log("\nTimeout reached. You can check the contract on Etherscan for the result");
+        console.log("Contract address:", CONTRACT_ADDRESS);
+        resolve();
+      }, 180000); // 3 minutes
+    });
+
+  } catch (error) {
+    console.error("\nError:", error);
+    if (error.error && error.error.message) {
+      console.error("Revert reason:", error.error.message);
+    }
+    if (error.transaction) {
+      console.error("Transaction details:", JSON.stringify(error.transaction, null, 2));
+    }
+    process.exit(1);
+  }
+}
+
+main()
+  .then(() => process.exit(0))
+  .catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });
+
+
+
+
+Now my query is , here deploy file run succcessfully, and create a new contract address now i want to create VRF using that smart contract address that only deploy one timeout
+
+
+
+so my motive is create chainLink VRF using offChain, and there without solidity file creation, so basis on this file create a single file where i can generate chainlink VRF using OffChain and give me full file without error

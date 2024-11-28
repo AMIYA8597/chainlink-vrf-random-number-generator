@@ -51,8 +51,6 @@ for ethereum mainnet :  {
 
 
 
-
-
 I'll guide you through each step:
 
 1. First, let's make sure you have a proper subscription ID. Let's go through the VRF subscription setup:
