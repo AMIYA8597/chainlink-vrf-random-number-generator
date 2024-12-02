@@ -1,194 +1,154 @@
+this is my currently smart contract which is running successfully and the path is    contracts/RandomNumberGenerator.solidity
 
 
 
 
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.19;
 
-this is my javascript file  scripts/deploy.js file 
+import {VRFConsumerBaseV2Plus} from "@chainlink/contracts/src/v0.8/vrf/dev/VRFConsumerBaseV2Plus.sol";
+import {VRFV2PlusClient} from "@chainlink/contracts/src/v0.8/vrf/dev/libraries/VRFV2PlusClient.sol";
+
+contract JackVRFNumberGenerator is VRFConsumerBaseV2Plus {
+    event RequestSent(uint256 requestId);
+    event NumbersGenerated(uint256[5] mainNumbers, uint256[2] additionalNumbers);
+
+    struct RequestStatus {
+        bool fulfilled;
+        bool exists;
+        uint256[5] mainNumbers;
+        uint256[2] additionalNumbers;
+    }
+    mapping(uint256 => RequestStatus) public s_requests;
+
+    uint256 public s_subscriptionId;
+    uint256[] public requestIds;
+    uint256 public lastRequestId;
+
+    // Hardcoded for Sepolia
+    bytes32 public constant KEY_HASH = 0x787d74caea10b2b357790d5b5247c2f63d1d91572a9846f780606e4d953677ae;
+    uint32 public constant CALLBACK_GAS_LIMIT = 250000;
+    uint16 public constant REQUEST_CONFIRMATIONS = 3;
+    uint32 public constant NUM_WORDS = 7;
+
+    constructor(
+        uint256 subscriptionId
+    ) VRFConsumerBaseV2Plus(0x9DdfaCa8183c41ad55329BdeeD9F6A8d53168B1B) {
+        s_subscriptionId = subscriptionId;
+    }
+
+    function requestRandomWords() 
+        external 
+        onlyOwner 
+        returns (uint256 requestId) 
+    {
+        requestId = s_vrfCoordinator.requestRandomWords(
+            VRFV2PlusClient.RandomWordsRequest({
+                keyHash: KEY_HASH,
+                subId: s_subscriptionId,
+                requestConfirmations: REQUEST_CONFIRMATIONS,
+                callbackGasLimit: CALLBACK_GAS_LIMIT,
+                numWords: NUM_WORDS,
+                extraArgs: VRFV2PlusClient._argsToBytes(
+                    VRFV2PlusClient.ExtraArgsV1({
+                        nativePayment: false
+                    })
+                )
+            })
+        );
+        
+        s_requests[requestId] = RequestStatus({
+            mainNumbers: [uint256(0), 0, 0, 0, 0],
+            additionalNumbers: [uint256(0), 0],
+            exists: true,
+            fulfilled: false
+        });
+        
+        requestIds.push(requestId);
+        lastRequestId = requestId;
+        emit RequestSent(requestId);
+        return requestId;
+    }
+
+    function fulfillRandomWords(
+        uint256 _requestId,
+        uint256[] calldata _randomWords
+    ) internal override {
+        require(s_requests[_requestId].exists, "request not found");
+        
+        // Convert first 5 numbers to range 1-48
+        uint256[5] memory mainNumbers;
+        for (uint i = 0; i < 5; i++) {
+            mainNumbers[i] = (_randomWords[i] % 48) + 1;
+        }
+        
+        // Convert last 2 numbers to range 1-11
+        uint256[2] memory additionalNumbers;
+        for (uint i = 0; i < 2; i++) {
+            additionalNumbers[i] = (_randomWords[5 + i] % 11) + 1;
+        }
+        
+        // Store and update request status
+        s_requests[_requestId].mainNumbers = mainNumbers;
+        s_requests[_requestId].additionalNumbers = additionalNumbers;
+        s_requests[_requestId].fulfilled = true;
+        
+        emit NumbersGenerated(mainNumbers, additionalNumbers);
+    }
+
+    function getRequestStatus(
+        uint256 _requestId
+    ) external view returns (
+        bool fulfilled, 
+        uint256[5] memory mainNumbers, 
+        uint256[2] memory additionalNumbers
+    ) {
+        require(s_requests[_requestId].exists, "request not found");
+        RequestStatus memory request = s_requests[_requestId];
+        return (request.fulfilled, request.mainNumbers, request.additionalNumbers);
+    }
+}
+
+
+
+
+this is my javascript file  scripts/deploy.js file which is also working currently
 
 
 const hre = require("hardhat");
-require("dotenv").config();
 
 async function main() {
-  try {
-    console.log("Starting deployment...");
+    // Get actual subscription ID from VRF Coordinator
+    const subscriptionId = process.env.SUBSCRIPTION_ID; // Replace with your subscription ID from VRF.chain.link
 
-    // Get deployment parameters
-    const subscriptionId = process.env.SUBSCRIPTION_ID;
-    const vrfCoordinator = process.env.VRF_COORDINATOR;
-    const keyHash = process.env.KEY_HASH;
+    console.log("Deploying JackVRFNumberGenerator...");
+    const JackVRFNumberGenerator = await hre.ethers.getContractFactory("JackVRFNumberGenerator");
+    const generator = await JackVRFNumberGenerator.deploy(subscriptionId);
 
-    // Validate parameters
-    if (!subscriptionId || !vrfCoordinator || !keyHash) {
-      throw new Error("Missing environment variables");
-    }
+    await generator.deployed();
 
-    // Convert subscription ID to the correct format
-    let formattedSubId;
-    try {
-      const bigNumSubId = hre.ethers.BigNumber.from(subscriptionId);
-      formattedSubId = bigNumSubId.mod(hre.ethers.BigNumber.from("18446744073709551616")); // 2^64
-      console.log("Formatted Subscription ID:", formattedSubId.toString());
-    } catch (error) {
-      console.error("Error formatting subscription ID:", error);
-      process.exit(1);
-    }
-
-    console.log("\nDeployment Parameters:");
-    console.log("Original Subscription ID:", subscriptionId);
-    console.log("Formatted Subscription ID:", formattedSubId.toString());
-    console.log("VRF Coordinator:", vrfCoordinator);
-    console.log("Key Hash:", keyHash);
-
-    // Deploy contract
-    console.log("\nDeploying RandomNumberGenerator...");
-    const RandomNumberGenerator = await hre.ethers.getContractFactory("RandomNumberGenerator");
-    
-    const randomNumberGenerator = await RandomNumberGenerator.deploy(
-      formattedSubId,
-      vrfCoordinator,
-      keyHash
-    );
-
-    await randomNumberGenerator.deployed();
-
-    console.log("\n✅ Contract deployed successfully!");
-    console.log(`Contract address: ${randomNumberGenerator.address}`);
-
-  } catch (error) {
-    console.error("\n❌ Deployment failed:");
-    console.error(error);
-    process.exit(1);
-  }
+    console.log("JackVRFNumberGenerator deployed to:", generator.address);
+    console.log("Subscription ID:", subscriptionId);
 }
 
 main()
-  .then(() => process.exit(0))
-  .catch((error) => {
-    console.error(error);
-    process.exit(1);
-  });
-
-
-
-
-
-// this is my another js file scripts/request-random-number.js
-
-
-
-
-
-
-
-
-
-
-
-const hre = require("hardhat");
-require("dotenv").config();
-
-async function main() {
-  try {
-    const CONTRACT_ADDRESS = process.env.CONTRACT_ADDRESS;
-    if (!CONTRACT_ADDRESS) {
-      throw new Error("CONTRACT_ADDRESS not found in environment variables");
-    }
-
-    console.log("Contract address:", CONTRACT_ADDRESS);
-
-    const [signer] = await hre.ethers.getSigners();
-    console.log("Using account:", signer.address);
-
-    const RandomNumberGenerator = await hre.ethers.getContractFactory("RandomNumberGenerator");
-    const contract = await RandomNumberGenerator.attach(CONTRACT_ADDRESS);
-
-    // Check contract state
-    const owner = await contract.owner();
-    console.log("Contract owner:", owner);
-
-    const subId = await contract.checkSubscription();
-    console.log("Subscription ID:", subId.toString());
-
-    const keyHash = await contract.s_keyHash();
-    console.log("Key Hash:", keyHash);
-
-    const coordinator = await contract.getCoordinator();
-    console.log("VRF Coordinator:", coordinator);
-
-    // Check if the caller is the owner
-    if (owner.toLowerCase() !== signer.address.toLowerCase()) {
-      throw new Error("The caller is not the contract owner");
-    }
-
-    console.log("Requesting random number...");
-    
-    // Request with higher gas limit
-    const tx = await contract.requestRandomNumber({
-      gasLimit: 3000000
+    .then(() => process.exit(0))
+    .catch((error) => {
+        console.error(error);
+        process.exit(1);
     });
 
-    console.log("Transaction hash:", tx.hash);
-    console.log("Waiting for confirmation...");
-    
-    const receipt = await tx.wait();
-    
-    if (receipt.status === 0) {
-      throw new Error("Transaction failed");
-    }
-
-    const requestSentEvent = receipt.events?.find(e => e.event === "RequestSent");
-    const requestId = requestSentEvent?.args?.requestId;
-
-    if (!requestId) {
-      throw new Error("No RequestSent event found");
-    }
-
-    console.log("Request ID:", requestId.toString());
-    console.log("\nWaiting for Chainlink VRF response...");
-    console.log("(This may take 1-2 minutes on Sepolia)");
-
-    return new Promise((resolve) => {
-      contract.once("NumberGenerated", async (randomNumber) => {
-        console.log("\nRandom number generated!");
-        console.log("Number (1-48):", randomNumber.toString());
-
-        const [fulfilled, randomWords] = await contract.getRequestStatus(requestId);
-        console.log("\nRequest Status:");
-        console.log("Fulfilled:", fulfilled);
-        console.log("Random Words:", randomWords.map(w => w.toString()));
-
-        resolve();
-      });
-
-      // Set timeout
-      setTimeout(() => {
-        console.log("\nTimeout reached. You can check the contract on Etherscan for the result");
-        console.log("Contract address:", CONTRACT_ADDRESS);
-        resolve();
-      }, 180000); // 3 minutes
-    });
-
-  } catch (error) {
-    console.error("\nError:", error);
-    if (error.error && error.error.message) {
-      console.error("Revert reason:", error.error.message);
-    }
-    if (error.transaction) {
-      console.error("Transaction details:", JSON.stringify(error.transaction, null, 2));
-    }
-    process.exit(1);
-  }
-}
-
-main()
-  .then(() => process.exit(0))
-  .catch((error) => {
-    console.error(error);
-    process.exit(1);
-  });
 
 
+
+
+
+
+
+
+
+
+now generate a different js file where after contract address creation using deploy.js file you can give me a random number which is 1 to 48 any number, but remember its need to come from VRF chainlink
 
 
 Now my query is , here deploy file run succcessfully, and create a new contract address now i want to create VRF using that smart contract address that only deploy one timeout

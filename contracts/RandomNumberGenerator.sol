@@ -4,9 +4,6 @@ pragma solidity ^0.8.19;
 import {VRFConsumerBaseV2Plus} from "@chainlink/contracts/src/v0.8/vrf/dev/VRFConsumerBaseV2Plus.sol";
 import {VRFV2PlusClient} from "@chainlink/contracts/src/v0.8/vrf/dev/libraries/VRFV2PlusClient.sol";
 
-// import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
-// import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
-
 contract JackVRFNumberGenerator is VRFConsumerBaseV2Plus {
     event RequestSent(uint256 requestId);
     event NumbersGenerated(uint256[5] mainNumbers, uint256[2] additionalNumbers);
@@ -106,6 +103,145 @@ contract JackVRFNumberGenerator is VRFConsumerBaseV2Plus {
         return (request.fulfilled, request.mainNumbers, request.additionalNumbers);
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// import {VRFConsumerBaseV2Plus} from "@chainlink/contracts/src/v0.8/vrf/dev/VRFConsumerBaseV2Plus.sol";
+// import {VRFV2PlusClient} from "@chainlink/contracts/src/v0.8/vrf/dev/libraries/VRFV2PlusClient.sol";
+
+// // import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
+// // import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
+
+// contract JackVRFNumberGenerator is VRFConsumerBaseV2Plus {
+//     event RequestSent(uint256 requestId);
+//     event NumbersGenerated(uint256[5] mainNumbers, uint256[2] additionalNumbers);
+
+//     struct RequestStatus {
+//         bool fulfilled;
+//         bool exists;
+//         uint256[5] mainNumbers;
+//         uint256[2] additionalNumbers;
+//     }
+//     mapping(uint256 => RequestStatus) public s_requests;
+
+//     uint256 public s_subscriptionId;
+//     uint256[] public requestIds;
+//     uint256 public lastRequestId;
+
+//     // Hardcoded for Sepolia
+//     bytes32 public constant KEY_HASH = 0x34386a32bc15bc5ba711f7aa2fe8b7f8e29b0842f957395b750574bb51065d17;
+//     uint32 public constant CALLBACK_GAS_LIMIT = 250000;
+//     uint16 public constant REQUEST_CONFIRMATIONS = 3;
+//     uint32 public constant NUM_WORDS = 7;
+
+//     constructor(
+//         uint256 subscriptionId
+//     ) VRFConsumerBaseV2Plus(0x9DdfaCa8183c41ad55329BdeeD9F6A8d53168B1B) {
+//         s_subscriptionId = subscriptionId;
+//     }
+
+//     function requestRandomWords() 
+//         external 
+//         onlyOwner 
+//         returns (uint256 requestId) 
+//     {
+//         requestId = s_vrfCoordinator.requestRandomWords(
+//             VRFV2PlusClient.RandomWordsRequest({
+//                 keyHash: KEY_HASH,
+//                 subId: s_subscriptionId,
+//                 requestConfirmations: REQUEST_CONFIRMATIONS,
+//                 callbackGasLimit: CALLBACK_GAS_LIMIT,
+//                 numWords: NUM_WORDS,
+//                 extraArgs: VRFV2PlusClient._argsToBytes(
+//                     VRFV2PlusClient.ExtraArgsV1({
+//                         nativePayment: false
+//                     })
+//                 )
+//             })
+//         );
+        
+//         s_requests[requestId] = RequestStatus({
+//             mainNumbers: [uint256(0), 0, 0, 0, 0],
+//             additionalNumbers: [uint256(0), 0],
+//             exists: true,
+//             fulfilled: false
+//         });
+        
+//         requestIds.push(requestId);
+//         lastRequestId = requestId;
+//         emit RequestSent(requestId);
+//         return requestId;
+//     }
+
+//     function fulfillRandomWords(
+//         uint256 _requestId,
+//         uint256[] calldata _randomWords
+//     ) internal override {
+//         require(s_requests[_requestId].exists, "request not found");
+        
+//         // Convert first 5 numbers to range 1-48
+//         uint256[5] memory mainNumbers;
+//         for (uint i = 0; i < 5; i++) {
+//             mainNumbers[i] = (_randomWords[i] % 48) + 1;
+//         }
+        
+//         // Convert last 2 numbers to range 1-11
+//         uint256[2] memory additionalNumbers;
+//         for (uint i = 0; i < 2; i++) {
+//             additionalNumbers[i] = (_randomWords[5 + i] % 11) + 1;
+//         }
+        
+//         // Store and update request status
+//         s_requests[_requestId].mainNumbers = mainNumbers;
+//         s_requests[_requestId].additionalNumbers = additionalNumbers;
+//         s_requests[_requestId].fulfilled = true;
+        
+//         emit NumbersGenerated(mainNumbers, additionalNumbers);
+//     }
+
+//     function getRequestStatus(
+//         uint256 _requestId
+//     ) external view returns (
+//         bool fulfilled, 
+//         uint256[5] memory mainNumbers, 
+//         uint256[2] memory additionalNumbers
+//     ) {
+//         require(s_requests[_requestId].exists, "request not found");
+//         RequestStatus memory request = s_requests[_requestId];
+//         return (request.fulfilled, request.mainNumbers, request.additionalNumbers);
+//     }
+// }
 
 
 
