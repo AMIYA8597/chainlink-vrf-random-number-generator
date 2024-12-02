@@ -3,65 +3,7 @@ const dotenv = require('dotenv');
 
 dotenv.config();
 
-const ABI = [
-  {
-    "inputs": [],
-    "name": "requestRandomWords",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "lastRequestId",
-    "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [{"internalType": "uint256", "name": "_requestId", "type": "uint256"}],
-    "name": "getRequestStatus",
-    "outputs": [
-      {"internalType": "bool", "name": "fulfilled", "type": "bool"},
-      {"internalType": "uint256[5]", "name": "mainNumbers", "type": "uint256[5]"},
-      {"internalType": "uint256[2]", "name": "additionalNumbers", "type": "uint256[2]"}
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "uint256",
-        "name": "requestId",
-        "type": "uint256"
-      }
-    ],
-    "name": "RequestSent",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "uint256[5]",
-        "name": "mainNumbers",
-        "type": "uint256[5]"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256[2]",
-        "name": "additionalNumbers",
-        "type": "uint256[2]"
-      }
-    ],
-    "name": "NumbersGenerated",
-    "type": "event"
-  }
-];
+const ABI = require("./abi/abi.json")
 
 async function getRandomNumbers() {
   const provider = new ethers.providers.JsonRpcProvider(process.env.SEPOLIA_RPC_URL);
